@@ -26,10 +26,10 @@ inputs:
     default: ${{ github.repository }}
 outputs:
   id:
-    description: Deployment ID created
+    description: Deployment status ID created
     value: ${{ steps.create.outputs.id }}
   json:
-    description: Deployment JSON
+    description: Deployment status JSON
     value: ${{ steps.create.outputs.json }}
 runs:
   using: composite
