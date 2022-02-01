@@ -1,0 +1,58 @@
+name: Create a deployment status
+description: Create a deployment status
+inputs:
+  id:
+    description: Deployment ID
+    required: true
+  state:
+    description: The state of the Deployment status
+    required: true
+  description:
+    description: A short description of the status. The maximum description length is 140 characters.
+    required: false
+  log_url:
+    description: The full URL of the deployment's output
+    required: false
+  environment_url:
+    description: Sets the URL for accessing your environment
+    required: false
+  token:
+    description: Github Token
+    required: true
+    default: ${{ github.token }}
+  repository:
+    description: The repository to use
+    required: false
+    default: ${{ github.repository }}
+outputs:
+  id:
+    description: Deployment ID created
+    value: ${{ steps.create.outputs.id }}
+  json:
+    description: Deployment JSON
+    value: ${{ steps.create.outputs.json }}
+runs:
+  using: composite
+  steps:
+  - shell: bash
+    id: create
+    env:
+      GITHUB_TOKEN: ${{ inputs.token }}
+      GH_REPO: ${{ inputs.repository }}
+    run: |
+      deployment=$(
+        gh api repos/$GH_REPO/deployments/${{ inputs.id }}/statuses \
+          -F state=${{ inputs.state }} \
+          -F log_url=${{ inputs.log_url }}\
+          -F description=${{ inputs.description }} \
+          -F environment_url=${{ inputs.environment_url }}
+      )
+
+      echo "::set-output name=id::$(jq -rc '.id' <<< $deployment)"
+      echo "::set-output name=json::$(jq -rc '.' <<< $deployment)"
+
+  - shell: bash
+    run: |
+      echo "::group::Outputs"
+      yq e -P <<< '${{ toJSON(steps.create.outputs) }}'
+      echo "::endgroup::"
