@@ -48,8 +48,8 @@ runs:
           -F environment_url=${{ inputs.environment_url }}
       )
 
-      echo "::set-output name=id::$(jq -rc '.id' <<< $deployment)"
-      echo "::set-output name=json::$(jq -rc '.' <<< $deployment)"
+      echo "id=$(jq -rc '.id' <<< $deployment) >> $GITHUB_OUTPUT"
+      echo "json=$(jq -rc '.' <<< $deployment) >> $GITHUB_OUTPUT"
 
   - shell: bash
     run: |
